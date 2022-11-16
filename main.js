@@ -7,7 +7,7 @@ var obj = {
     method: 'GET',
 
     headers: {
-        Authorization: 'token ' + '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',
+        Authorization: 'token ' + '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',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
 
