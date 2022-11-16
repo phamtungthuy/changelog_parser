@@ -6,12 +6,12 @@ document.querySelector(".btn").onclick = () => {
 var obj = {
     method: 'GET',
 
-    headers: {
-        Authorization: 'token ' + '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',
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
+//     headers: {
+//         Authorization: 'token ' + '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',
+//         'Accept': 'application/json',
+//         'Content-Type': 'application/json',
 
-    }
+//     }
 };
 
 async function handle(linkHtml) {
