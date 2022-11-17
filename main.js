@@ -7,7 +7,7 @@ var obj = {
     method: 'GET',
 
     headers: {
-        Authorization: 'token ' + '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',
+        Authorization: 'token ' + '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',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
 
@@ -72,11 +72,9 @@ function display(releases) {
               </tr>
             </thead>
             <tbody>`];
-
             var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-            await htmls.push(await Promise.all(arr.map(idx => {
-                console.log(`${release.compare}?page=${idx}`);
-                return fetch(`${release.compare}?page=${idx}`, obj)
+            for (var i = 0; i < arr.length; i++) {
+                htmls.push(await fetch(`${release.compare}?page=${arr[i]}`, obj)
                     .then(res => res.json())
                     .then(content => {
                         try {
@@ -87,14 +85,14 @@ function display(releases) {
                                 var title = messageArray[0];
                                 var body = messageArray.slice(1, messageArray.length).join('\n');
                                 return `<tr>
-                                        <th scope="row">${++id}<br>
-                                        <a href=${commit.url} class="com-url-api" target="_blank">Commit API</a>
-                                        <a href=${commit.html_url} class="com-url-html" target="_blank">Commit Page</a>
-                                        </th>
-                                        <td>${title}</td>
-                                        <td>${body}</td>
-                                        </tr>`;
-                            }).join('');
+                                            <th scope="row">${++id}<br>
+                                            <a href=${commit.url} class="com-url-api" target="_blank">Commit API</a>
+                                            <a href=${commit.html_url} class="com-url-html" target="_blank">Commit Page</a>
+                                            </th>
+                                            <td>${title}</td>
+                                            <td>${body}</td>
+                                            </tr>`;
+                            });
                         } catch (e) {
                             console.log(e);
                             return '';
@@ -103,8 +101,40 @@ function display(releases) {
                     .catch(e => {
                         console.log(e);
                         return '';
-                    })
-            })));
+                    }))
+            }
+            // var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            // await htmls.push(await Promise.all(arr.map(idx => {
+            //     console.log(`${release.compare}?page=${idx}`);
+            //     return fetch(`${release.compare}?page=${idx}`, obj)
+            //         .then(res => res.json())
+            //         .then(content => {
+            //             try {
+            //                 console.log(content);
+            //                 let id = 0;
+            //                 return content.commits.map(commit => {
+            //                     var messageArray = commit.commit.message.trim().split('\n');
+            //                     var title = messageArray[0];
+            //                     var body = messageArray.slice(1, messageArray.length).join('\n');
+            //                     return `<tr>
+            //                             <th scope="row">${++id}<br>
+            //                             <a href=${commit.url} class="com-url-api" target="_blank">Commit API</a>
+            //                             <a href=${commit.html_url} class="com-url-html" target="_blank">Commit Page</a>
+            //                             </th>
+            //                             <td>${title}</td>
+            //                             <td>${body}</td>
+            //                             </tr>`;
+            //                 }).join('');
+            //             } catch (e) {
+            //                 console.log(e);
+            //                 return '';
+            //             }
+            //         })
+            //         .catch(e => {
+            //             console.log(e);
+            //             return '';
+            //         })
+            // })));
             htmls.push(`</tbody></table></td><td>${release.changeLog.split('\n').join('<br>')}</td></tr></tbody></table></div>`)
                 //htmls.push(`</tbody></table><div style="float:left">${release.changeLog.split('\n').join('<br>')}</div></div>`);
             return htmls;
