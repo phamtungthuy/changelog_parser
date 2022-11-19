@@ -6,7 +6,7 @@ document.querySelector(".btn").onclick = () => {
 var obj = {
     method: 'GET',
     headers: {
-        Authorization: 'token ' + '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',
+        Authorization: 'token ' + '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',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
     }
