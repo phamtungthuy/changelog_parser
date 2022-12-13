@@ -1,12 +1,13 @@
 var linkApi;
 document.querySelector(".btn").onclick = () => {
+    console.log("click!");
     handle(document.querySelector(".input-link").value);
 }
 
 var obj = {
     method: 'GET',
     headers: {
-        //Authorization: 'token ' + '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',
+        Authorization: 'token ' + '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',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
     }
@@ -40,129 +41,133 @@ async function handle(linkHtml) {
     display(releases);
 }
 
-
-function display(releases) {
-    var releaseList = [];
-    for (let i = 0; i < releases.length - 1; i++) {
-        console.log(linkApi + '/compare/' + releases[i + 1].version + '...' + releases[i].version);
-        releaseList.push({
-            compare: linkApi + '/compare/' + releases[i + 1].version + '...' + releases[i].version,
-            version: releases[i].version,
-            changeLog: releases[i].changeLog
-        });
+function isNumber(text) {
+    for (var i = 0; i < text.length; i++) {
+        if (text[i] >= '0' && text[i] <= '9') continue;
+        return false;
     }
-    Promise.all(releaseList.map(async(release, idx) => {
-            var htmls = [`<div class ="row">${release.version}<table class="table table-striped table-dark ">
-            <thead>
-                <tr>
-                    <th scope="col">commits</th>
-                    <th scope="col">changelog</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>
-            <table class="table table-striped table-dark ">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">title</th>
-                <th scope="col">message</th>
-              </tr>
-            </thead>
-            <tbody>`];
-            var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-            for (var i = 0; i < arr.length; i++) {
-                htmls.push(await fetch(`${release.compare}?page=${arr[i]}`, obj)
-                    .then(res => res.json())
-                    .then(content => {
-                        try {
-                            console.log(content);
-                            let id = 0;
-                            return content.commits.map(commit => {
-                                var messageArray = commit.commit.message.trim().split('\n');
-                                var title = messageArray[0];
-                                var body = messageArray.slice(1, messageArray.length).join('\n');
-                                return `<tr>
-                                            <th scope="row">${++id}<br>
-                                            <a href=${commit.url} class="com-url-api" target="_blank">Commit API</a>
-                                            <a href=${commit.html_url} class="com-url-html" target="_blank">Commit Page</a>
-                                            </th>
-                                            <td>${title}</td>
-                                            <td>${body}</td>
-                                            </tr>`;
-                            });
-                        } catch (e) {
-                            console.log(e);
-                            return '';
-                        }
-                    })
-                    .catch(e => {
-                        console.log(e);
-                        return '';
-                    }))
+    return true;
+}
+
+
+function solve(text) {
+    var strings = text.split('\n');
+    var ans = '';
+    var isBreak = false;
+    strings.forEach(string => {
+        if (isBreak) return;
+        if (string.indexOf('Contributors') != -1 || string.indexOf('New Contributors') != -1) {
+            isBreak = true;
+            return;
+        }
+        let level = 0;
+        while (string.indexOf('  ') == 0) {
+            ++level;
+            string = string.substring(2);
+        }
+        string = string.trim();
+        if ((string.indexOf('##') == 0 || string.indexOf('#') == 0) && isNaN(string.substring(1, string.length))) {
+            ans += `<h1>${string.substring(2)}</h1><br>`;
+            return;
+        }
+        let line = `<span class="level${level}">`;
+        if (string[0] == '+') {
+            string = string.substring(1);
+            if (level == 0) {
+                string = '-' + string;
+            } else if (level == 1) {
+                string = '+' + string;
+            } else if (level == 2) {
+                string = '(-)' + string;
+            } else {
+                string = '(+)' + string;
             }
-            // var arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-            // await htmls.push(await Promise.all(arr.map(idx => {
-            //     console.log(`${release.compare}?page=${idx}`);
-            //     return fetch(`${release.compare}?page=${idx}`, obj)
-            //         .then(res => res.json())
-            //         .then(content => {
-            //             try {
-            //                 console.log(content);
-            //                 let id = 0;
-            //                 return content.commits.map(commit => {
-            //                     var messageArray = commit.commit.message.trim().split('\n');
-            //                     var title = messageArray[0];
-            //                     var body = messageArray.slice(1, messageArray.length).join('\n');
-            //                     return `<tr>
-            //                             <th scope="row">${++id}<br>
-            //                             <a href=${commit.url} class="com-url-api" target="_blank">Commit API</a>
-            //                             <a href=${commit.html_url} class="com-url-html" target="_blank">Commit Page</a>
-            //                             </th>
-            //                             <td>${title}</td>
-            //                             <td>${body}</td>
-            //                             </tr>`;
-            //                 }).join('');
-            //             } catch (e) {
-            //                 console.log(e);
-            //                 return '';
-            //             }
-            //         })
-            //         .catch(e => {
-            //             console.log(e);
-            //             return '';
-            //         })
-            // })));
-            htmls.push(`</tbody></table></td><td>${release.changeLog.split('\n').join('<br>')}</td></tr></tbody></table></div>`)
-                //htmls.push(`</tbody></table><div style="float:left">${release.changeLog.split('\n').join('<br>')}</div></div>`);
-            return htmls;
-        }))
-        .then(arr => {
-            console.log(arr.join(''))
-            document.querySelector('#releases').innerHTML = arr.join('');
-            document.querySelectorAll('#releases > div > table').forEach((table, idx) => {
-                table.onclick = () => {
-                    let body = document.querySelector(`#releases div:nth-child(${idx + 1}) table tbody`)
-                    if (body.style.display === 'none' || body.style.display == '') {
-                        body.style.display = 'table-row-group';
-                    } else {
-                        body.style.display = 'none';
-                    }
+        }
+        for (var i = 0; i < string.length;) {
+
+            if (string[i] == '(' && string.indexOf('https://', i) == i + 1) {
+                let index = string.indexOf(')', i);
+                let url = string.substring(i + 1, index);
+                line += `(<a href="${url}">${url}</a>)`;
+                i = index + 1;
+            } else if (string.indexOf('https://', i) == i) {
+                let url = string.substring(i);
+                let last = url.split('/').slice(-1);
+                console.log(last[0] + " " + !isNaN(last[0]));
+                if (last[0].trim() != '' && !isNaN(last[0])) {
+                    line += `<a href="${url}">#${last[0]}</a>`
+                } else {
+                    line += `<a href="${url}">${url}</a>`;
                 }
-            });
-        })
-        .catch((htmls) => {
-            console.log(htmls.join(''))
-            document.querySelector('#releases').innerHTML = htmls.join('');
-            document.querySelectorAll('#releases > div > table').forEach((table, idx) => {
-                table.onclick = () => {
-                    let body = document.querySelector(`#releases div:nth-child(${idx + 1}) table tbody`)
-                    if (body.style.display === 'none' || body.style.display == '') {
-                        body.style.display = 'table-row-group';
-                    } else {
-                        body.style.display = 'none';
-                    }
+                i = string.length;
+            } else if (string[i] == '[') {
+                let lastIndex = string.indexOf(']', i);
+                var firstElement = string.substring(i, lastIndex + 1);
+                i = lastIndex + 1;
+                if (string.indexOf('(https://', i) == i) {
+                    var secondLastIndex = string.indexOf(')', i);
+                    line += `<a href="${string.substring(i + 1, secondLastIndex)}">${firstElement.substring(1, firstElement.length - 1)}</a>`;
+                    i = secondLastIndex + 1;
+                } else {
+                    line += firstElement;
                 }
-            });
-        })
+            } else if(string[i] == '#') {
+                let index = string.indexOf(' ', i);
+                if(index == -1) {
+                    index = string.length;
+                }
+                let nString = '';
+                if(index > i) {
+                    nString = string.substring(i + 1, index);
+                }
+                if(nString != '' && !isNaN(nString)) {
+                    line += `<a href="https://github.com/apache/echarts/issues/${nString}">#${nString} </a>`;
+                    i = index;
+                } else {
+                    line += string[i];
+                    ++i;
+                }
+            }else {
+                line += string[i];
+                ++i;
+            }
+        }
+        line += '</span><br>';
+        ans += line;
+    });
+    return ans;
+}
+
+async function handleText(text) {
+
+    if (text.indexOf('---') != -1) {
+        text = text.split('---');
+        if (text.length == 2) {
+            text = text[0];
+        } else text = text[1];
+    }
+    text = await solve(text);
+    return text;
+}
+
+async function display(releases) {
+    var htmls = [`<table class="table table-striped table-dark">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">version</th>
+            <th scope="col">changelog</th>
+        </tr>
+    </thead>
+    <tbody>`];
+    for (let i = 0; i < releases.length; i++) {
+        htmls.push(`<tr>
+            <td>${i + 1}</td>
+            <td>${releases[i].version}</td>
+            <td>${await handleText(releases[i].changeLog)}</td>
+        </tr>`)
+    }
+    htmls.push(`</tbody></table>`);
+    document.querySelector('.content').innerHTML = htmls.join('');
+
 };
